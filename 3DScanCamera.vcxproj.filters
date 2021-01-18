@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="gphoto2pp\src\camera_abilities_list_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\camera_file_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\camera_list_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\camera_widget_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\camera_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\choices_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\date_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\float_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\gp_port_info_list_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\helper_camera_wrapper.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\helper_context.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\helper_debugging.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\helper_gphoto2.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\helper_widgets.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\int_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\menu_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\non_value_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\radio_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\range_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\section_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\string_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\text_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\toggle_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gphoto2pp\src\window_widget.cpp">
+      <Filter>libgphoto2\source</Filter>
+    </ClCompile>
+    <ClCompile Include="gpio\gpio.cpp">
+      <Filter>gpio</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp" />
+    <ClCompile Include="logger.cpp" />
+    <ClCompile Include="camerathread.cpp" />
+    <ClCompile Include="mastercontrol.cpp" />
+    <ClCompile Include="command.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="libgphoto2">
+      <UniqueIdentifier>{2949e657-287c-439c-be6c-44bbb0371925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libgphoto2\include">
+      <UniqueIdentifier>{23cf5d7f-05de-46ab-abef-f7ff5eb7d54a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libgphoto2\source">
+      <UniqueIdentifier>{e2422a5d-d964-48fe-8dfa-71e3b45a10e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gpio">
+      <UniqueIdentifier>{e3b9e143-ba0d-4b13-98f1-8b5f78282fa5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\button_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_abilities_list_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_capture_type_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_event_type_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_file_path_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_file_type_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_file_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_list_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_widget_type_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_widget_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\choices_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\date_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\exceptions.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\float_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\gp_port_info_list_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\helper_camera_wrapper.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\helper_context.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\helper_debugging.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\helper_gphoto2.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\helper_widgets.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\int_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\log.h">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\menu_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\non_value_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\observer.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\radio_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\range_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\range_widget_range.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\section_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\string_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\text_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\toggle_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\value_widget_base.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gphoto2pp\include\gphoto2pp\window_widget.hpp">
+      <Filter>libgphoto2\include</Filter>
+    </ClInclude>
+    <ClInclude Include="gpio\gpio.h">
+      <Filter>gpio</Filter>
+    </ClInclude>
+    <ClInclude Include="predef.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="logger.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="camerathread.h" />
+    <ClInclude Include="mastercontrol.h" />
+    <ClInclude Include="command.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="config.txt" />
+  </ItemGroup>
+</Project>

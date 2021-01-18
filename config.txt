@@ -1,0 +1,8 @@
+[MASTER]
+true
+[NAME]
+rasp_1
+[ID]
+pi
+[PASSWD]
+1111
