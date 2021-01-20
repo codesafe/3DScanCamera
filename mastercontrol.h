@@ -11,5 +11,7 @@ public :
 	bool Initialize();
 
 private:
+	static int WaitInput(int i);
+
 	GPIO* gpio;
 };

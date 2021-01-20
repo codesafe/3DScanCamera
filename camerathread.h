@@ -10,8 +10,13 @@ public :
 
 	bool Initialize(int number);
 
+	static mutex _lock;
+	static condition_variable wakeupEvent;
+
 private :
-	void WorkThread(int cameranumber);
+	void ParseCommand(int cameralocalnumber);
+
+	void WorkThread(int cameralocalnumber);
 	void Wait();
 
 	int	cameranumber;
@@ -20,6 +25,5 @@ private :
 
 	GPIO *gpio;
 
-	mutex _lock;
-	condition_variable sEvent;
+
 };

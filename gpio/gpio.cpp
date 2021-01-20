@@ -101,9 +101,9 @@ namespace exploringRPi {
 	int GPIO::setDirection(GPIO_DIRECTION dir) 
 	{
 		switch (dir) {
-		case _INPUT: return this->write(this->path, "direction", "in");
+		case INPUT: return this->write(this->path, "direction", "in");
 			break;
-		case _OUTPUT:return this->write(this->path, "direction", "out");
+		case OUTPUT:return this->write(this->path, "direction", "out");
 			break;
 		}
 		return -1;
@@ -154,8 +154,8 @@ namespace exploringRPi {
 
 	GPIO_DIRECTION GPIO::getDirection() {
 		string input = this->read(this->path, "direction");
-		if (input == "in") return _INPUT;
-		else return _OUTPUT;
+		if (input == "in") return INPUT;
+		else return OUTPUT;
 	}
 
 	GPIO_EDGE GPIO::getEdgeType() 
@@ -186,7 +186,7 @@ namespace exploringRPi {
 
 	int GPIO::toggleOutput() 
 	{
-		this->setDirection(_OUTPUT);
+		this->setDirection(OUTPUT);
 		if ((bool)this->getValue()) this->setValue(_LOW);
 		else this->setValue(_HIGH);
 		return 0;
@@ -199,7 +199,7 @@ namespace exploringRPi {
 
 	int GPIO::toggleOutput(int numberOfTimes, int time) 
 	{
-		this->setDirection(_OUTPUT);
+		this->setDirection(OUTPUT);
 		this->toggleNumber = numberOfTimes;
 		this->togglePeriod = time;
 		this->threadRunning = true;
@@ -230,7 +230,7 @@ namespace exploringRPi {
 	// Blocking Poll - based on the epoll socket code in the epoll man page
 	int GPIO::waitForEdge() 
 	{
-		this->setDirection(_INPUT); // must be an input pin to poll its value
+		this->setDirection(INPUT); // must be an input pin to poll its value
 		int fd, i, epollfd, count = 0;
 		struct epoll_event ev;
 		epollfd = epoll_create(1);

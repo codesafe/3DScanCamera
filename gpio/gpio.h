@@ -39,8 +39,8 @@ namespace exploringRPi
 	typedef int (*CallbackType)(int);
 	enum GPIO_DIRECTION 
 	{ 
-		_INPUT, 
-		_OUTPUT 
+		INPUT, 
+		OUTPUT 
 	};
 	enum GPIO_VALUE { _LOW = 0, _HIGH = 1 };
 	enum GPIO_EDGE { NONE, _RISING, _FALLING, _BOTH };

@@ -110,6 +110,7 @@
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mastercontrol.cpp" />
+    <ClCompile Include="networkthread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camerathread.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="gpio\gpio.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="mastercontrol.h" />
+    <ClInclude Include="networkthread.h" />
     <ClInclude Include="predef.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

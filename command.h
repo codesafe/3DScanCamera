@@ -4,15 +4,17 @@
 
 enum CommandType
 {
-	NETWORK_COMMAND,
-	GPIO_COMMAND,
+	COMMAND_NONE,
+	COMMAND_NETWORK,
+	COMMAND_GPIO,
 };
 
+#define COMMAND_BUFFERSIZE	8
 
 struct _Command
 {
 	CommandType	type;
-	char buffer[8];
+	char buffer[COMMAND_BUFFERSIZE];
 };
 
 
@@ -26,14 +28,17 @@ class CommandQueue
 			return _instance;
 		}
 
-		_Command GetCommand();
-		void AddCommand(_Command command);
+		void ClearCommand();
+		void GetCommand(_Command &command);
+		void AddCommand(_Command &command);
 
 	private:
 		CommandQueue();
 		~CommandQueue();
 
 		static CommandQueue* _instance;
+		mutex _lock;
+		_Command command;
 
-		std::queue< _Command> command_queue;
+		//std::queue<_Command> command_queue;
 };

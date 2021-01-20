@@ -82,6 +82,7 @@
     <ClCompile Include="camerathread.cpp" />
     <ClCompile Include="mastercontrol.cpp" />
     <ClCompile Include="command.cpp" />
+    <ClCompile Include="networkthread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libgphoto2">
@@ -213,6 +214,7 @@
     <ClInclude Include="camerathread.h" />
     <ClInclude Include="mastercontrol.h" />
     <ClInclude Include="command.h" />
+    <ClInclude Include="networkthread.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />
