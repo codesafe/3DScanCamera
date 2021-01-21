@@ -7,23 +7,30 @@ condition_variable CameraThread::wakeupEvent;
 
 CameraThread::CameraThread()
 {
-	gpio = nullptr;
+	for (int i = 0; i < MAX_CAMERA; i++)
+		gpio[i] = nullptr;
 }
 
 CameraThread::~CameraThread()
 {
-	delete gpio;
-	gpio = nullptr;
+	for (int i = 0; i < MAX_CAMERA; i++)
+	{
+		if (gpio[i] != nullptr)
+			delete gpio[i];
+		gpio[i] = nullptr;
+	}
 }
 
 bool CameraThread::Initialize(int number)
 {
-	cameranumber = number;
-	_thread = thread(&CameraThread::WorkThread, this, cameranumber);
+	for (int i = 0; i < number; i++)
+	{
+		_thread = thread(&CameraThread::WorkThread, this, i);
 
-	// 카메라 Shoot용
-	gpio = new GPIO(CAMERA_GPIO[cameranumber]);
-	gpio->setDirection(GPIO_DIRECTION::OUTPUT);
+		// 카메라 Shoot용
+		gpio[i] = new GPIO(CAMERA_GPIO[cameranumber]);
+		gpio[i]->setDirection(GPIO_DIRECTION::OUTPUT);
+	}
 
 	return true;
 }

@@ -1,45 +1,70 @@
 ﻿#include "predef.h"
 #include "config.h"
+#include "networkthread.h"
+#include "tcpsocket.h"
+//#include "udpsocket.h"
+#include "camerathread.h"
 
 
-//==============================================================================================================================
+///////////////////////////////////////////////////////////////////////////////////////////// 
 
-int CAMERA_GPIO[] = { 17, 18, 27, 22, 23, 24, 25, 5, 6, 12, 13};
+void RecieveServerInfo()
+{
+	int sock;
+	struct sockaddr_in broadcastAddr;
+	unsigned short broadcastPort;
+	char recvString[UDP_BUFFER] = { 0, };
+	int recvStringLen;
 
-// Aperture
-string apertureString[] = { "5", "5.6", "6.3", "7.1", "8", "9", "10", "11", "13", "14",  "16", "18", "20", "22", "25", "29", "32" };
+	broadcastPort = SERVER_UDP_BROADCASTPORT;
 
-// ISO
-string isoString[] = { "Auto", "100", "200", "400", "800", "1600", "3200", "6400" };
+	if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+	{
+		Logger::log("socket() failed");
+		return;
+	}
 
-// Shutter Speed
-string shutterspeedString[] = {
-"bulb", "30", "25", "20", "15", "13", "10", "8", "6", "5", "4", "3.2", "2.5", "2", "1.6", "1.3", "1", "0.8", "0.6", "0.5", "0.4",
-"0.3", "1/4", "1/5", "1/6", "1/8", "1/10", "1/13", "1/15", "1/20", "1/25", "1/30", "1/40", "1/50", "1/60", "1/80", "1/100", "1/125",
-"1/160", "1/200", "1/250", "1/320", "1/400", "1/500", "1/640", "1/800", "1/1000", "1/1250", "1/1600", "1/2000", "1/2500", "1/3200", "1/4000" };
-
-// Capture format
-string captureformatString[] = { "Large Fine JPEG", "Large Normal JPEG", "Medium Fine JPEG", "Medium Normal JPEG", "Small Fine JPEG",
-"Small Normal JPEG", "Smaller JPEG", "Tiny JPEG", "RAW + Large Fine JPEG", "RAW" };
+	memset(&broadcastAddr, 0, sizeof(broadcastAddr));
+	broadcastAddr.sin_family = AF_INET;
+	broadcastAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	broadcastAddr.sin_port = htons(broadcastPort);
 
 
-//==============================================================================================================================
+	static int reuseFlag = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuseFlag, sizeof reuseFlag) != 0)
+	{
+		Logger::log("[%s] RecieveServerInfo setsockopt(SO_REUSEADDR) error: ", __FUNCTION__);
+		close(sock);
+		return;
+	}
 
+	if (bind(sock, (struct sockaddr*)&broadcastAddr, sizeof(broadcastAddr)) < 0)
+	{
+		Logger::log("RecieveServerInfo bind() failed");
+		return;
+	}
 
-string iso = isoString[ISO_VALUE];
-string aperture = apertureString[APERTURE_VALUE];
-string shutterspeed = shutterspeedString[SHUTTERSPEED_VALUE];
-string captureformat = captureformatString[CAPTURE_FORMAT_VALUE];
+	if ((recvStringLen = recvfrom(sock, recvString, UDP_BUFFER, 0, NULL, 0)) < 0)
+	{
+		Logger::log("RecieveServerInfo recvfrom() failed");
+		return;
+	}
+	//recvString[recvStringLen] = '\0';
 
-bool recieved_serveraddress = false;
-string server_address = "";// SERVER_ADD;
-string machine_name = "";
-string capturefile_ext = "jpg";
-string ftp_path = "";
-string ftp_id = "";
-string ftp_passwd = "";
-string camera_id = "";
-bool ismaster = false;
+	char vbuff[UDP_BUFFER] = { 0, };
+	sprintf(vbuff, "%d.%d.%d.%d", (unsigned char)recvString[1], (unsigned char)recvString[2],
+		(unsigned char)recvString[3], (unsigned char)recvString[4]);
+
+	//Logger::log("Received: %d : %s\n", recvString[0], vbuff);
+
+	if (recvString[0] == UDP_BROADCAST_PACKET)
+	{
+		server_address = string(vbuff);
+		Logger::log("Recv server address : %s", server_address.c_str());
+	}
+
+	close(sock);
+}
 
 
 int main(void)
@@ -48,11 +73,27 @@ int main(void)
 	Config::getInstance()->Initialize();
 
 	// Recieve Server Address
+	RecieveServerInfo();
 
 	// TODO. Check Camera
 
+	// TODO. Start Camera Thread
+	CameraThread cameraThread;
+	cameraThread.Initialize(3);	//  (카메라 만큼)
+
+	// TODO. Start TCP Thread
+	NetworkThread network;
+	network.Initialize();
 
 
+
+	while (true)
+	{
+		Utils::Sleep(1);
+	}
+
+	cameraThread.Wait();
+	network.Wait();
 
 	return 0;
 }
