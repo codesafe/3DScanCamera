@@ -284,6 +284,14 @@ namespace Utils
 		}
 	}
 
+	static CAMERA_MANUFACTURER getManufacture(string name)
+	{
+		if (name.find("CANON") == string::npos)
+			return CAMERA_MANUFACTURER::CAMERA_CANON;
+		else if (name.find("NIKON") == string::npos)
+			return CAMERA_MANUFACTURER::CAMERA_NIKON;
+		return CAMERA_MANUFACTURER::CAMERA_UNKNOWN;
+	}
 };
 
 

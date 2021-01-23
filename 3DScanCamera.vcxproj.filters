@@ -83,6 +83,9 @@
     <ClCompile Include="mastercontrol.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="networkthread.cpp" />
+    <ClCompile Include="tcpsocket.cpp" />
+    <ClCompile Include="predef.cpp" />
+    <ClCompile Include="cameracontrol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libgphoto2">
@@ -215,8 +218,11 @@
     <ClInclude Include="mastercontrol.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="networkthread.h" />
+    <ClInclude Include="tcpsocket.h" />
+    <ClInclude Include="cameracontrol.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />
+    <Text Include="desc.txt" />
   </ItemGroup>
 </Project>

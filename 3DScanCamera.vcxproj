@@ -65,8 +65,9 @@
       <LibraryDependencies>wiringPi</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>gpio export 17 out</Command>
-      <Message>sudo 없이 깜박임 프로그램을 실행할 수 있도록 GPIO 유틸리티를 사용하여 핀 17을 내보내세요.</Message>
+      <Command>cp config.txt bin/ARM/Debug</Command>
+      <Message>
+      </Message>
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -79,6 +80,7 @@
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cameracontrol.cpp" />
     <ClCompile Include="camerathread.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="config.cpp" />
@@ -111,8 +113,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mastercontrol.cpp" />
     <ClCompile Include="networkthread.cpp" />
+    <ClCompile Include="predef.cpp" />
+    <ClCompile Include="tcpsocket.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cameracontrol.h" />
     <ClInclude Include="camerathread.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="config.h" />
@@ -156,10 +161,12 @@
     <ClInclude Include="mastercontrol.h" />
     <ClInclude Include="networkthread.h" />
     <ClInclude Include="predef.h" />
+    <ClInclude Include="tcpsocket.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />
+    <Text Include="desc.txt" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -168,6 +175,9 @@
     <Link>
       <LibraryDependencies>gphoto2;gphoto2_port;pthread;curl;%(LibraryDependencies)</LibraryDependencies>
     </Link>
+    <RemotePostBuildEvent>
+      <Command>cp config.txt bin/ARM64/Debug</Command>
+    </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

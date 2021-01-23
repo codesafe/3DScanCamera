@@ -9,12 +9,15 @@ enum CommandType
 	COMMAND_GPIO,
 };
 
-#define COMMAND_BUFFERSIZE	8
-
 struct _Command
 {
 	CommandType	type;
-	char buffer[COMMAND_BUFFERSIZE];
+	char buffer[TCP_BUFFER];
+	_Command()
+	{
+		type = COMMAND_NONE;
+		memset(buffer, 0, TCP_BUFFER);
+	}
 };
 
 

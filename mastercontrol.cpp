@@ -3,7 +3,9 @@
 #include "mastercontrol.h"
 #include "command.h"
 #include "camerathread.h"
+#include "utils.h"
 
+// 이건 Slave Rasp에만 작동되어야한다
 
 MasterControl::MasterControl()
 {
@@ -19,11 +21,12 @@ MasterControl::~MasterControl()
 bool MasterControl::Initialize()
 {
 	// 이전 RASP에서 넘어온 Shoot 신호 캡쳐 --> 각 카메라들 작동하게 Signal 발생
+#ifdef _ENABLE_GPIO
 	gpio = new GPIO(MASTERCONTROL_GPIO);
 	gpio->setDirection(GPIO_DIRECTION::INPUT);
-	gpio->setEdgeType(GPIO_EDGE::_RISING);
+	gpio->setEdgeType(GPIO_EDGE::RISING);
 	gpio->waitForEdge(&WaitInput);
-
+#endif
 	return true;
 }
 

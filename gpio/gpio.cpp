@@ -112,9 +112,9 @@ namespace exploringRPi {
 	int GPIO::setValue(GPIO_VALUE value) 
 	{
 		switch (value) {
-		case _HIGH: return this->write(this->path, "value", "1");
+		case HIGH: return this->write(this->path, "value", "1");
 			break;
-		case _LOW: return this->write(this->path, "value", "0");
+		case LOW: return this->write(this->path, "value", "0");
 			break;
 		}
 		return -1;
@@ -125,11 +125,11 @@ namespace exploringRPi {
 		switch (value) {
 		case NONE: return this->write(this->path, "edge", "none");
 			break;
-		case _RISING: return this->write(this->path, "edge", "rising");
+		case RISING: return this->write(this->path, "edge", "rising");
 			break;
-		case _FALLING: return this->write(this->path, "edge", "falling");
+		case FALLING: return this->write(this->path, "edge", "falling");
 			break;
-		case _BOTH: return this->write(this->path, "edge", "both");
+		case BOTH: return this->write(this->path, "edge", "both");
 			break;
 		}
 		return -1;
@@ -148,8 +148,8 @@ namespace exploringRPi {
 
 	GPIO_VALUE GPIO::getValue() {
 		string input = this->read(this->path, "value");
-		if (input == "0") return _LOW;
-		else return _HIGH;
+		if (input == "0") return LOW;
+		else return HIGH;
 	}
 
 	GPIO_DIRECTION GPIO::getDirection() {
@@ -161,9 +161,9 @@ namespace exploringRPi {
 	GPIO_EDGE GPIO::getEdgeType() 
 	{
 		string input = this->read(this->path, "edge");
-		if (input == "rising") return _RISING;
-		else if (input == "falling") return _FALLING;
-		else if (input == "both") return _BOTH;
+		if (input == "rising") return RISING;
+		else if (input == "falling") return FALLING;
+		else if (input == "both") return BOTH;
 		else return NONE;
 	}
 
@@ -187,8 +187,8 @@ namespace exploringRPi {
 	int GPIO::toggleOutput() 
 	{
 		this->setDirection(OUTPUT);
-		if ((bool)this->getValue()) this->setValue(_LOW);
-		else this->setValue(_HIGH);
+		if ((bool)this->getValue()) this->setValue(LOW);
+		else this->setValue(HIGH);
 		return 0;
 	}
 
@@ -217,8 +217,8 @@ namespace exploringRPi {
 		GPIO* gpio = static_cast<GPIO*>(value);
 		bool isHigh = (bool)gpio->getValue(); //find current value
 		while (gpio->threadRunning) {
-			if (isHigh)	gpio->setValue(_HIGH);
-			else gpio->setValue(_LOW);
+			if (isHigh)	gpio->setValue(HIGH);
+			else gpio->setValue(LOW);
 			usleep(gpio->togglePeriod * 500);
 			isHigh = !isHigh;
 			if (gpio->toggleNumber > 0) gpio->toggleNumber--;

@@ -2,7 +2,9 @@
 true
 [NAME]
 rasp_1
-[ID]
+[FTP_ID]
 pi
-[PASSWD]
+[FTP_PASSWD]
 1111
+[SERVERIP]
+192.168.29.103

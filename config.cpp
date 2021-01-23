@@ -1,5 +1,6 @@
 #include "predef.h"
 #include "config.h"
+#include "utils.h"
 
 Config* Config::_instance = nullptr;
 

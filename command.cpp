@@ -17,7 +17,7 @@ void CommandQueue::ClearCommand()
 {
 	unique_lock<mutex> lock(_lock);
 	command.type = COMMAND_NONE;
-	memset(command.buffer, 0, COMMAND_BUFFERSIZE);
+	memset(command.buffer, 0, TCP_BUFFER);
 }
 
 void CommandQueue::AddCommand(_Command &_command)
@@ -26,7 +26,7 @@ void CommandQueue::AddCommand(_Command &_command)
 
 	unique_lock<mutex> lock(_lock);
 	command.type = _command.type;
-	memcpy(command.buffer, _command.buffer, COMMAND_BUFFERSIZE);
+	memcpy(command.buffer, _command.buffer, TCP_BUFFER);
 
 }
 
@@ -37,6 +37,6 @@ void CommandQueue::GetCommand(_Command &_command)
 
 	unique_lock<mutex> lock(_lock);
 	_command.type = command.type;
-	memcpy(_command.buffer, command.buffer, COMMAND_BUFFERSIZE);
+	memcpy(_command.buffer, command.buffer, TCP_BUFFER);
 }
 

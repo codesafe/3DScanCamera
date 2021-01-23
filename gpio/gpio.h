@@ -42,8 +42,8 @@ namespace exploringRPi
 		INPUT, 
 		OUTPUT 
 	};
-	enum GPIO_VALUE { _LOW = 0, _HIGH = 1 };
-	enum GPIO_EDGE { NONE, _RISING, _FALLING, _BOTH };
+	enum GPIO_VALUE { LOW = 0, HIGH = 1 };
+	enum GPIO_EDGE { NONE, RISING, FALLING, BOTH };
 
 	class GPIO 
 	{

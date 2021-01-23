@@ -21,11 +21,11 @@ bool TCP_Socket::init()
 		return false;
 	}
 
-	Logger::log("init tcp server address : %s", server_address.c_str());
+	Logger::log("init tcp server address : %s", global_server_address.c_str());
 	memset((void*)&server, 0x00, sizeof(server));
 
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = inet_addr(server_address.c_str());
+	server.sin_addr.s_addr = inet_addr(global_server_address.c_str());
 	server.sin_port = htons(SERVER_TCP_PORT);
 
 	int flag = 1;
@@ -69,7 +69,6 @@ void TCP_Socket::destroy()
 bool TCP_Socket::connect()
 {
 
-#if 1
 	int ret, err;
 	fd_set set;
 	FD_ZERO(&set);
@@ -98,26 +97,86 @@ bool TCP_Socket::connect()
 			printf("getsockopt() error: %d\n", err);
 			return false;
 		}
-	  }
-#else
+	}
 
-	int err = ::connect(sock, (struct sockaddr*)&server, sizeof(server));
-	if (err != 0)
+	Logger::log("connected %s : %d", global_server_address.c_str(), SERVER_TCP_PORT);
+
+	int curFlags = fcntl(sock, F_GETFL, 0);
+	if (fcntl(sock, F_SETFL, curFlags | O_NONBLOCK) < 0)
 	{
-		Logger::log("connect failed. Error!");
+		Logger::log("Set nonblock error");
+		close(sock);
 		return false;
 	}
-#endif
-
-	Logger::log("connected %s : %d", server_address.c_str(), SERVER_TCP_PORT);
 
 	return true;
 }
 
-int TCP_Socket::update(char* buf)
+int TCP_Socket::update()
 {
+	fd_set read_flags, write_flags;
+	struct timeval waitd;          // the max wait time for an event
+	int sel;
+
+	waitd.tv_sec = 0;
+	waitd.tv_usec = 1000;		// micro second
+	FD_ZERO(&read_flags);
+	FD_ZERO(&write_flags);
+	FD_SET(sock, &read_flags);
+
+	sel = select(sock + 1, &read_flags, &write_flags, (fd_set*)0, &waitd);
+	if (sel < 0) 
+		return true;	// 아무것도 없다!
+
+	// 읽을것이 있으면 read
+	if (FD_ISSET(sock, &read_flags))
+	{
+		FD_CLR(sock, &read_flags);
+
+		char in[TCP_BUFFER];
+		memset(&in, 0, sizeof(in));
+
+		int recvsize = ::recv(sock, in, sizeof(in), 0);
+		if (recvsize <= 0)
+		{
+			Logger::log("Socket recv. Error!");
+			close(sock);
+			return false;
+		}
+		else
+		{
+			memcpy(recvbuffer.buffer, in, recvsize);
+			recvbuffer.totalsize = recvsize;
+
+			SocketBuffer buffer;
+			buffer.totalsize = recvbuffer.totalsize;
+			memcpy(buffer.buffer, recvbuffer.buffer, buffer.totalsize);
+			recvbufferlist.push_back(buffer);
+		}
+	}
+
+	// 보낼것이 있으면 보낸다로 설정
+	if (sendbuffer.totalsize > 0)
+		FD_SET(sock, &write_flags);
+
+	// 보냄
+	if (FD_ISSET(sock, &write_flags))
+	{
+		FD_CLR(sock, &write_flags);
+		int sendsize = ::send(sock, sendbuffer.buffer + sendbuffer.currentsize, sendbuffer.totalsize - sendbuffer.currentsize, 0);
+		if (sendbuffer.totalsize == sendbuffer.currentsize + sendsize)
+		{
+			senddone();
+		}
+		else
+		{
+			sendbuffer.currentsize += sendsize;
+		}
+	}
+
 	return 1;
 }
+
 
 int TCP_Socket::send(char* buf)
 {
@@ -146,7 +205,7 @@ int TCP_Socket::recv(char* buf)
 		totalrecv += n;
 		if (totalrecv >= TCP_BUFFER)
 		{
-			printf("TCP Recv : %d\n", totalrecv);
+			//printf("TCP Recv : %d\n", totalrecv);
 			break;
 		}
 	}
@@ -155,3 +214,51 @@ int TCP_Socket::recv(char* buf)
 	//return ::recv(sock, buf, TCP_BUFFER, 0);
 }
 
+void TCP_Socket::addsendpacket(char* packet)
+{
+	if (sendbuffer.totalsize > 0)
+	{
+		// 전송 중이라 쌓아 놓는다
+		SocketBuffer buf;
+		buf.totalsize = TCP_BUFFER;
+		memcpy(buf.buffer, packet, TCP_BUFFER);
+		sendbufferlist.push_back(buf);
+	}
+	else
+	{
+		// 바로 전송할거로 이동
+		sendbuffer.totalsize = TCP_BUFFER;
+		sendbuffer.currentsize = 0;
+		memcpy(sendbuffer.buffer, packet, TCP_BUFFER);
+	}
+}
+
+void	TCP_Socket::senddone()
+{
+	if (!sendbufferlist.empty())
+	{
+		sendbuffer.totalsize = sendbufferlist[0].totalsize;
+		sendbuffer.currentsize = 0;
+		memcpy(sendbuffer.buffer, sendbufferlist[0].buffer, sendbufferlist[0].totalsize);
+		sendbufferlist.pop_front();
+	}
+	else
+	{
+		sendbuffer.totalsize = -1;
+		sendbuffer.currentsize = 0;
+		memset(sendbuffer.buffer, 0, TCP_BUFFER);
+	}
+}
+
+
+bool	TCP_Socket::getrecvpacket(char* buffer)
+{
+	if (!recvbufferlist.empty())
+	{
+		memcpy(buffer, recvbufferlist[0].buffer, TCP_BUFFER);
+		recvbufferlist.pop_front();
+		return true;
+	}
+
+	return false;
+}

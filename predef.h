@@ -71,22 +71,20 @@
 #include <gphoto2pp/log.h>
 
 #include "logger.h"
-#include "utils.h"
 #include "gpio/gpio.h"
 
-
-//#include "tcpsocket.h"
-//#include "udpsocket.h"
 
 using namespace gphoto2pp;
 using namespace std;
 using namespace exploringRPi;
 
+#define _ENABLE_GPIO
 
 //////////////////////////////////////////////////////////////////////////
 
 enum CAMERA_MANUFACTURER
 {
+	CAMERA_UNKNOWN,
 	CAMERA_CANON,
 	CAMERA_NIKON,
 };
@@ -155,28 +153,22 @@ struct WriteThis
 
 //////////////////////////////////////////////////////////////////////////
 
+struct CameraInfo
+{
+	string	modelname;
+	string	port;
+	CAMERA_MANUFACTURER manufacture;
+};
+
+extern std::vector<CameraInfo> global_Camerainfo;
+
+//////////////////////////////////////////////////////////////////////////
+
 #define CAPTURE_TO_RAM			0 // "Internal RAM"
 #define CAPTURE_TO_SDCARD		1 // "Memory card"
 
-
 // 카메라 최대 10개
 #define MAX_CAMERA	10
-
-// 카메라 상태
-enum CAMERA_STATE
-{
-	STATE_NONE,
-	STATE_STARTCONNECT,
-	STATE_CONNECTION,
-	STATE_CONNECT_ERROR,
-	STATE_READY,
-	STATE_FOCUSING,
-	STATE_SHOT,
-	STATE_UPLOAD,
-	STATE_UPLOADING,
-};
-
-
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -184,14 +176,17 @@ enum CAMERA_STATE
 #define SERVER_TCP_PORT					8888
 #define SERVER_UDP_PORT					11000
 #define SERVER_UDP_BROADCASTPORT		9999
-#define SOCKET_BUFFER		4096
+
 #define TCP_BUFFER			32
 #define UDP_BUFFER			32
 
 //////////////////////////////////////////////////////////////////////////	network packet
 
-// response packet
+// slave / master 라즈베리
+#define RASP_SLAVE		0
+#define RASP_MASTER		1
 
+// response packet
 #define RESPONSE_OK				0x07
 #define RESPONSE_FAIL			0x08
 
@@ -202,13 +197,11 @@ enum CAMERA_STATE
 
 
 // Packet
-
+#define	PACKET_MACHINE_NUMBER	0x07	// 머신 번호 ( Server -> Rasp )
 #define	PACKET_MACHINE_INFO		0x08	// 머신 정보
 #define PACKET_CAMERA_NAME		0x09
 #define	PACKET_SHOT				0x10	// shot picture
-#define PACKET_HALFPRESS		0x20	// auto focus
-#define PACKET_HALFRELEASE		0x21	// auto focus cancel
-
+#define PACKET_AUTOFOCUS		0x20	// auto focus
 #define PACKET_SET_PARAMETER	0x30
 
 #define PACKET_FORCE_UPLOAD		0x40	// for test
@@ -225,10 +218,11 @@ enum CAMERA_STATE
 
 enum CAMERA_PARAM
 {
-	ISO,
+	ISO = 0,
 	SHUTTERSPEED,
 	APERTURE,
-	CAPTURE_FORMAT
+	CAPTURE_FORMAT,
+	PARAM_MAX
 };
 
 #define ISO_VALUE				3	// 400
@@ -245,34 +239,32 @@ enum CAMERA_PARAM
 #define APERTURE_VALUE			"9"
 */
 
-extern string iso;
-extern string aperture;
-extern string shutterspeed;
-extern string captureformat;
+extern string global_iso;
+extern string global_aperture;
+extern string global_shutterspeed;
+extern string global_captureformat;
 
-extern string apertureString[];
-extern string isoString[];
-extern string shutterspeedString[];
-extern string captureformatString[];
+extern string global_apertureString[];
+extern string global_isoString[];
+extern string global_shutterspeedString[];
+extern string global_captureformatString[];
 
 // read from local config.txt
-extern bool ismaster;
-extern bool recieved_serveraddress;
-extern string server_address;
-extern string machine_name;
-extern string capturefile_ext;			// 캡쳐파일 확장자
+extern bool global_ismaster;
+extern bool global_recieved_serveraddress;
+extern string global_server_address;
+extern string global_machine_name;
+extern string global_capturefile_ext;			// 캡쳐파일 확장자
 
 // recv from server
-extern string ftp_path;
-extern string camera_id;
-extern string ftp_id;
-extern string ftp_passwd;
-
-extern class TCP_Socket tcp_socket;
-//extern class UDP_Socket udp_socket;
+extern int global_raspmachine_id;
+extern string global_ftp_path;
+extern string global_camera_id;
+extern string global_ftp_id;
+extern string global_ftp_passwd;
 
 #define MASTERCONTROL_GPIO		26 // GPIO 26은 마스터용
-extern int CAMERA_GPIO[];
+extern int global_CAMERA_GPIO[];
 
 
 
