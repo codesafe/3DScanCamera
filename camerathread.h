@@ -17,20 +17,26 @@ public :
 	bool Initialize();
 	void Wait();
 
-	static mutex _lock;
-	static condition_variable wakeupEvent;
+	static mutex _lock[MAX_CAMERA];
+	static condition_variable wakeupEvent[MAX_CAMERA];
 
 private :
 	void ParseCommand(int cameralocalnumber);
 	void WorkThread(int cameralocalnumber);
 
+	static bool StartUpload(int camnum);
+	static size_t read_callback(void* ptr, size_t size, size_t nmemb, void* userp);
+	static int upload_progress[MAX_CAMERA];
+	static float delaytime[MAX_CAMERA];
+	static WriteThis upload[MAX_CAMERA];
+
 	int	cameranumber;
 	CAMERA_MANUFACTURER	camera_manufacturer;
 	thread	_thread[MAX_CAMERA];
 
-	float delaytime[MAX_CAMERA];
 	GPIO *gpio[MAX_CAMERA];
 	CameraControl* cameracontrol[MAX_CAMERA];
+
 
 
 };

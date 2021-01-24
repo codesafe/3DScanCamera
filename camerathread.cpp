@@ -4,8 +4,11 @@
 #include "networkthread.h"
 #include "utils.h"
 
-mutex CameraThread::_lock;
-condition_variable CameraThread::wakeupEvent;
+mutex CameraThread::_lock[MAX_CAMERA];
+condition_variable CameraThread::wakeupEvent[MAX_CAMERA];
+int CameraThread::upload_progress[MAX_CAMERA] = { 0, };
+float CameraThread::delaytime[MAX_CAMERA] = { 0.f, };
+WriteThis CameraThread::upload[MAX_CAMERA];
 
 
 CameraThread::CameraThread()
@@ -44,6 +47,7 @@ bool CameraThread::Initialize()
 		// 카메라 Shoot용 GPIO
  		gpio[i] = new GPIO(global_CAMERA_GPIO[i]);
  		gpio[i]->setDirection(GPIO_DIRECTION::OUTPUT);
+		gpio[i]->setValue(LOW);
 #endif
 		// Camera wrapper
 		string modelname = global_Camerainfo[i].modelname;
@@ -63,15 +67,14 @@ void CameraThread::WorkThread(int cameralocalnumber)
 	bool loop = true;
 	while (loop)
 	{
-		unique_lock<mutex> lock(_lock);
+		unique_lock<mutex> lock(_lock[cameralocalnumber]);
 		Logger::log("Wait camera thread : %d", cameralocalnumber);
-		wakeupEvent.wait(lock);
-		Logger::log("Wakeup camera thread : %d", cameralocalnumber);
+		wakeupEvent[cameralocalnumber].wait(lock);
 
-		// 카메라를 Shoot하고 Download 용
+		string  date = Utils::getCurrentDateTime();
+		Logger::log("Wakeup camera thread : %d : %s", cameralocalnumber, date.c_str());
+
 		ParseCommand(cameralocalnumber);
-
-		//printf("Pass %d : %s\n", cameranumber, getCurrentDateTime().c_str());
 	}
 
 }
@@ -106,14 +109,20 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 			std::string  date = Utils::getCurrentDateTime();
 			Logger::log("GPIO --> %s", date.c_str());
 
+			Utils::Sleep(2);
+
+			gpio[cameralocalnumber]->setValue(LOW);
+			cameracontrol[cameralocalnumber]->ReleaseButton();
+
+
 			string name = Utils::format_string("%s-%d.%s", global_machine_name.c_str(), cameralocalnumber,
 				global_capturefile_ext.c_str());
 			cameracontrol[cameralocalnumber]->GetFilefromCamera(name.c_str());
 
 			Utils::Sleep(1);
 
-			cameracontrol[cameralocalnumber]->ReleaseButton();
-			gpio[cameralocalnumber]->setValue(LOW);
+			// Upload to FTP
+			StartUpload(cameralocalnumber);
 		}
 	}
 	else if (command.type == CommandType::COMMAND_NETWORK)
@@ -146,7 +155,7 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 			buf[2] = ret ? RESPONSE_OK : RESPONSE_FAIL;
 			NetworkThread::getInstance()->Send(buf);
 		}
-		else if (command.buffer[0] = PACKET_AUTOFOCUS)
+		else if (command.buffer[0] == PACKET_AUTOFOCUS)
 		{
 			// 자동 포커스
 			bool ret = cameracontrol[cameralocalnumber]->AutoFocus();
@@ -160,5 +169,137 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 	}
 }
 
+bool CameraThread::StartUpload(int cameraNum)
+{
+	upload_progress[cameraNum] = 0;
 
+	CURL* curl;
+	CURLcode res;
+	//struct WriteThis upload;
+	string name = Utils::format_string("%s-%d.%s", global_machine_name.c_str(), cameraNum, global_capturefile_ext.c_str());
+
+	Logger::log(cameraNum, "--------------------------------------------------------");
+	Logger::log(cameraNum, "Start Upload FTP : %s", name.c_str());
+	Logger::log(cameraNum, "--------------------------------------------------------");
+
+	char* inbuf = NULL;
+	int len = 0;
+
+	FILE* fp = NULL;
+	fp = fopen(name.c_str(), "rb");
+	if (fp == NULL)
+	{
+		Logger::log(cameraNum, "%s file not found.", name.c_str());
+		return false;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	len = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	inbuf = new char[len];
+	fread(inbuf, 1, len, fp);
+	fclose(fp);
+
+	upload[cameraNum].camnum = cameraNum;
+	upload[cameraNum].readptr = inbuf;
+	upload[cameraNum].totalsize = len;
+	upload[cameraNum].sizeleft = len;
+
+	Logger::log(cameraNum, "filesize : %d", len);
+
+
+	curl = curl_easy_init();
+	if (curl)
+	{
+		string url = "ftp://" + global_server_address + "/" + global_ftp_path + "/" + name;
+		string ftpstr = global_ftp_id + ":" + global_ftp_passwd;
+
+		Logger::log("FTP full path : %s (%s)", url.c_str(), ftpstr.c_str());
+
+		//string url = "ftp://192.168.29.103/" + name;
+		//curl_easy_setopt(curl, CURLOPT_URL, "ftp://192.168.29.103/2.jpg");
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl, CURLOPT_USERPWD, ftpstr.c_str());
+		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+		curl_easy_setopt(curl, CURLOPT_READDATA, &upload[cameraNum]);
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
+		curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)upload[cameraNum].sizeleft);
+
+		// 전송!
+		res = curl_easy_perform(curl);
+
+		if (res != CURLE_OK)
+		{
+			Logger::log(cameraNum, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		}
+		curl_easy_cleanup(curl);
+	}
+
+	// send finish packet
+	char buf[TCP_BUFFER] = { 0, };
+	buf[0] = PACKET_UPLOAD_DONE;
+	buf[1] = cameraNum;
+	NetworkThread::getInstance()->Send(buf);
+
+	Logger::log(cameraNum, "Upload complete");
+
+	// 끝
+	delete[] inbuf;
+	return true;
+}
+
+size_t CameraThread::read_callback(void* ptr, size_t size, size_t nmemb, void* userp)
+{
+	struct WriteThis* upload = (struct WriteThis*)userp;
+	size_t max = size * nmemb;
+
+	if (max < 1)
+		return 0;
+
+	if (upload->sizeleft)
+	{
+		size_t copylen = max;
+		if (copylen > upload->sizeleft)
+			copylen = upload->sizeleft;
+		memcpy(ptr, upload->readptr, copylen);
+		upload->readptr += copylen;
+		upload->sizeleft -= copylen;
+
+		int progress = (int)(((float)(upload->totalsize - upload->sizeleft) / upload->totalsize) * 100.f);
+		int p = (progress / 10);
+
+		if (upload_progress[upload->camnum] != p)
+		{
+			upload_progress[upload->camnum] = p;
+
+			Logger::log(upload->camnum, "upload_progress %d", upload_progress[upload->camnum]);
+
+			//char data[32];
+			//memcpy(data, &upload_progress[upload->camnum], sizeof(int));
+			//network[upload->camnum].write(PACKET_UPLOAD_PROGRESS, data, 32);
+			//network[upload->camnum].update();
+
+			char buf[TCP_BUFFER] = { 0, };
+			if (p == 10)
+			{
+				buf[0] = PACKET_UPLOAD_PROGRESS;
+				buf[1] = (char)upload->camnum;
+				buf[2] = (char)upload_progress[upload->camnum];
+			}
+			else
+			{
+				buf[0] = PACKET_UPLOAD_PROGRESS;
+				buf[1] = (char)upload->camnum;
+				buf[2] = (char)upload_progress[upload->camnum];
+			}
+
+			// progress send to server
+			NetworkThread::getInstance()->Send(buf);
+		}
+		return copylen;
+	}
+
+	return 0;                          /* no more data left to deliver */
+}
 

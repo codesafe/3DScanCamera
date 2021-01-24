@@ -123,7 +123,11 @@ void NetworkThread::ParseCommand()
 		Logger::log("notify_all --> %s", date.c_str());
 
 		CommandQueue::getInstance()->AddCommand(command);
-		CameraThread::wakeupEvent.notify_all();
+		for (int i=0; i<MAX_CAMERA; i++)
+		{
+			CameraThread::wakeupEvent[i].notify_one();
+		}
+
 	}
 
 	ResetBuffer();

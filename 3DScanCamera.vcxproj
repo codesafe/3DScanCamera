@@ -190,6 +190,17 @@
       <Command>cp config.txt bin/x64/Debug</Command>
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <Link>
+      <LibraryDependencies>gphoto2;gphoto2_port;pthread;curl;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
+    <RemotePostBuildEvent>
+      <Command>cp config.txt bin/ARM64/Release</Command>
+    </RemotePostBuildEvent>
+    <ClCompile>
+      <AdditionalIncludeDirectories>gphoto2pp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

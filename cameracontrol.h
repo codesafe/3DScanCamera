@@ -16,13 +16,14 @@ public :
 
 	int GetFilefromCamera(const char* filename);
 
-	void StartListeningForEvents();
-	void StopListeningForEvents();
-
 private :
+	int SetConfigAction(const char* name, const char* value);
+	int _find_widget_by_name(GPParams* p, const char* name, CameraWidget** child, CameraWidget** rootconfig);
 
 	bool SetRadioWidgetName(string param, string value);
 	bool SetRadioWidget(string param, string value);
+	bool SetToggleWidget(string param, string value);
+
 	CameraWrapper* cameraWrapper;
 
 	string params[CAMERA_PARAM::PARAM_MAX];

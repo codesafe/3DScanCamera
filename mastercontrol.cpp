@@ -43,7 +43,10 @@ int MasterControl::WaitInput(int i)
 	CommandQueue::getInstance()->AddCommand(command);
 
 	// 2. Thread Wake
-	CameraThread::wakeupEvent.notify_all();
+	for (int i = 0; i < MAX_CAMERA; i++)
+	{
+		CameraThread::wakeupEvent[i].notify_one();
+	}
 
 	return i;
 }
