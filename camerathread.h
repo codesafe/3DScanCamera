@@ -22,7 +22,8 @@ public :
 
 private :
 	void ParseCommand(int cameralocalnumber);
-	void WorkThread(int cameralocalnumber);
+	void CameraWorkThread(int cameralocalnumber);
+	void GPIODummyThread(int dummypos);
 
 	static bool StartUpload(int camnum);
 	static size_t read_callback(void* ptr, size_t size, size_t nmemb, void* userp);

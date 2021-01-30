@@ -60,24 +60,43 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <MultiProcNumber>4</MultiProcNumber>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <MultiProcNumber>4</MultiProcNumber>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <MultiProcNumber>4</MultiProcNumber>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <MultiProcNumber>4</MultiProcNumber>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
-      <LibraryDependencies>wiringPi</LibraryDependencies>
+      <LibraryDependencies>gphoto2;gphoto2_port;pthread;curl;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>cp config.txt bin/ARM/Debug</Command>
+      <Command>cp config_slave.txt bin/ARM/Debug/config.txt</Command>
       <Message>
       </Message>
     </RemotePostBuildEvent>
+    <ClCompile>
+      <AdditionalIncludeDirectories>gphoto2pp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <Link>
-      <LibraryDependencies>wiringPi</LibraryDependencies>
+      <LibraryDependencies>gphoto2;gphoto2_port;pthread;curl;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>gpio export 17 out</Command>
-      <Message>sudo 없이 깜박임 프로그램을 실행할 수 있도록 GPIO 유틸리티를 사용하여 핀 17을 내보내세요.</Message>
+      <Command>cp config_slave.txt bin/ARM/Release/config.txt</Command>
+      <Message>
+      </Message>
     </RemotePostBuildEvent>
+    <ClCompile>
+      <AdditionalIncludeDirectories>gphoto2pp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cameracontrol.cpp" />
@@ -111,9 +130,9 @@
     <ClCompile Include="gpio\gpio.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mastercontrol.cpp" />
     <ClCompile Include="networkthread.cpp" />
     <ClCompile Include="predef.cpp" />
+    <ClCompile Include="slaveremotecontrol.cpp" />
     <ClCompile Include="tcpsocket.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,9 +177,9 @@
     <ClInclude Include="gphoto2pp\include\gphoto2pp\window_widget.hpp" />
     <ClInclude Include="gpio\gpio.h" />
     <ClInclude Include="logger.h" />
-    <ClInclude Include="mastercontrol.h" />
     <ClInclude Include="networkthread.h" />
     <ClInclude Include="predef.h" />
+    <ClInclude Include="slaveremotecontrol.h" />
     <ClInclude Include="tcpsocket.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

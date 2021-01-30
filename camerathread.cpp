@@ -41,38 +41,79 @@ bool CameraThread::Initialize()
 
 	for (int i = 0; i < cameranumber; i++)
 	{
-		_thread[i] = thread(&CameraThread::WorkThread, this, i);
+		_thread[i] = thread(&CameraThread::CameraWorkThread, this, i);
+	}
 
-#ifdef _ENABLE_GPIO
-		// 카메라 Shoot용 GPIO
- 		gpio[i] = new GPIO(global_CAMERA_GPIO[i]);
- 		gpio[i]->setDirection(GPIO_DIRECTION::OUTPUT);
-		gpio[i]->setValue(LOW);
-#endif
-		// Camera wrapper
-		string modelname = global_Camerainfo[i].modelname;
-		string port = global_Camerainfo[i].port;
-		cameracontrol[i] = new CameraControl();
-		cameracontrol[i]->Initialize(modelname, port);
+	// GPIO Trigger 더미가 필요
+	if (global_ismaster)
+	{
+		_thread[cameranumber] = thread(&CameraThread::GPIODummyThread, this, cameranumber);
 	}
 
 	return true;
 }
 
-
-void CameraThread::WorkThread(int cameralocalnumber)
+// 마스터의 경우 Slave들을 Trig할 더미 스레드
+void CameraThread::GPIODummyThread(int dummypos)
 {
-	printf("create thread %d\n", cameralocalnumber);
+	Logger::log("Create GPIODummyThread %d", dummypos);
+
+#ifdef _ENABLE_GPIO
+	// 카메라 Shoot용 GPIO
+	gpio[dummypos] = new GPIO(MASTERCONTROL_GPIO);
+	gpio[dummypos]->setDirection(GPIO_DIRECTION::OUTPUT);
+	gpio[dummypos]->setValue(HIGH);
+#endif
+	
+	bool loop = true;
+	while (loop)
+	{
+		unique_lock<mutex> lock(_lock[dummypos]);
+		Logger::log("@@ Wait GPIODummy Thread : %d", dummypos);
+		wakeupEvent[dummypos].wait(lock);
+
+		_Command command;
+		CommandQueue::getInstance()->GetCommand(command);
+
+		// 찍기만 관여
+		if (command.buffer[0] == PACKET_SHOT)
+		{
+			// Slave GPIO를 향하여 Trigger on
+			gpio[dummypos]->setValue(LOW);
+
+			//Logger::log("Master GPIO Trigger On");
+
+			Utils::Sleep(1);
+			gpio[dummypos]->setValue(HIGH);
+
+		}
+	}
+}
+
+void CameraThread::CameraWorkThread(int cameralocalnumber)
+{
+	Logger::log("\n----------------------\nCreate Camera thread %d\n----------------------", cameralocalnumber);
+
+#ifdef _ENABLE_GPIO
+	// 카메라 Shoot용 GPIO
+	gpio[cameralocalnumber] = new GPIO(global_CAMERA_GPIO[cameralocalnumber]);
+	gpio[cameralocalnumber]->setDirection(GPIO_DIRECTION::OUTPUT);
+	gpio[cameralocalnumber]->setValue(LOW);
+#endif
+	// Camera wrapper
+	string modelname = global_Camerainfo[cameralocalnumber].modelname;
+	string port = global_Camerainfo[cameralocalnumber].port;
+	cameracontrol[cameralocalnumber] = new CameraControl();
+	cameracontrol[cameralocalnumber]->Initialize(modelname, port);
+
 
 	bool loop = true;
 	while (loop)
 	{
 		unique_lock<mutex> lock(_lock[cameralocalnumber]);
-		Logger::log("Wait camera thread : %d", cameralocalnumber);
+		Logger::log("@@ Wait camera thread : %d", cameralocalnumber);
 		wakeupEvent[cameralocalnumber].wait(lock);
-
-		string  date = Utils::getCurrentDateTime();
-		Logger::log("Wakeup camera thread : %d : %s", cameralocalnumber, date.c_str());
+		//Logger::log("Wakeup camera thread : %d", cameralocalnumber);
 
 		ParseCommand(cameralocalnumber);
 	}
@@ -81,8 +122,18 @@ void CameraThread::WorkThread(int cameralocalnumber)
 
 void CameraThread::Wait()
 {
-	for(int i=0; i< cameranumber;i++)
+	for (int i = 0; i < cameranumber; i++)
+	{
+		Logger::log("## Camera Thread %d Joined", i);
 		_thread[i].join();
+	}
+
+	if (global_ismaster)
+	{
+		Logger::log("## GPIODummyThread %d Joined", cameranumber);
+		_thread[cameranumber].join();
+	}
+
 }
 
 void CameraThread::ParseCommand(int cameralocalnumber)
@@ -94,20 +145,19 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 	{
 		if (command.buffer[0] == PACKET_SHOT)
 		{
+			Logger::log("-----> PACKET_SHOT");
+
 			if (delaytime[cameralocalnumber] > 0)
 			{
 				Logger::log("Shot delay enabled %d", delaytime[cameralocalnumber]);
 				Utils::Sleep(delaytime[cameralocalnumber]);
 			}
 
-			// ftp path 읽어야함
-			global_ftp_path = (char*)(command.buffer + 1);
-
 			// GPIO에서 Shoot 신호들어옴
 			gpio[cameralocalnumber]->setValue(HIGH);
 
 			std::string  date = Utils::getCurrentDateTime();
-			Logger::log("GPIO --> %s", date.c_str());
+			//Logger::log("GPIO --> %s", date.c_str());
 
 			Utils::Sleep(2);
 
@@ -157,6 +207,9 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 		}
 		else if (command.buffer[0] == PACKET_AUTOFOCUS)
 		{
+			// ftp path 읽어야함
+			global_ftp_path = (char*)(command.buffer + 1);
+
 			// 자동 포커스
 			bool ret = cameracontrol[cameralocalnumber]->AutoFocus();
 

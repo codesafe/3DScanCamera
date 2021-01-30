@@ -58,12 +58,12 @@ void NetworkThread::Update()
 
 void NetworkThread::Wait()
 {
+	Logger::log("## NetworkThread Joined");
 	_thread.join();
 }
 
 void NetworkThread::ParseCommand()
 {
-
 	// parse recv buffer
 	bool sendcommand = false;
 	_Command command;
@@ -108,10 +108,18 @@ void NetworkThread::ParseCommand()
 		// Master 머신에게 찍으라 명령
 		case PACKET_SHOT :
 			{
-				// 마스터이기 때문에 현재 머신의 GPIO 모두 셋
-				command.type = CommandType::COMMAND_GPIO;
-				memcpy(command.buffer, buffer, TCP_BUFFER);
-				sendcommand = true;
+				if (global_ismaster == true)
+				{
+					// 마스터이기 때문에 현재 머신의 GPIO 모두 셋
+					command.type = CommandType::COMMAND_GPIO;
+					memcpy(command.buffer, buffer, TCP_BUFFER);
+					sendcommand = true;
+				}
+				else
+				{
+					// Slave인데 쏘라 했다
+					Logger::log("Error PACKET_SHOT on Slave");
+				}
 			}
 			break;
 	}

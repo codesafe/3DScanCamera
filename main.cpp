@@ -3,7 +3,7 @@
 #include "networkthread.h"
 #include "camerathread.h"
 #include "tcpsocket.h"
-#include "mastercontrol.h"
+#include "slaveremotecontrol.h"
 #include "utils.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////// 
@@ -110,20 +110,18 @@ int main(void)
 
 	// Check All Cameras
 	int cameranum = EnumCameraList();
-// 	if (cameranum == 0)
-// 	{
-// 		Logger::log("No Camera Detected. Exit.");
-// 		return -1;
-// 	}
+	if (cameranum == 0)
+	{
+		Logger::log("No Camera Detected. Exit.");
+		return -1;
+	}
 
 	// Recieve Server Address
 	//RecieveServerInfo(); 
 
 	// Start Camera Thread
-	//int cameranum = 3;
-
 	CameraThread cameraThread;
-	cameraThread.Initialize();	//  (카메라 만큼)
+	cameraThread.Initialize();	//  Master는 카메라 + 더미 만큼 , Slave는 카메라 만큼
 
 	// Start TCP Thread
 	NetworkThread::getInstance()->Initialize();
@@ -131,17 +129,16 @@ int main(void)
 	// Master GPIO Listener
 	if(global_ismaster == false)
 	{
-		MasterControl mastercontrol;
-		mastercontrol.Initialize();
+		SlaveRemoteControl::getInstance()->Initialize();
 	}
+
+	cameraThread.Wait();
+	NetworkThread::getInstance()->Wait();
 
 	while (true)
 	{
 		Utils::Sleep(1);
 	}
-
-	cameraThread.Wait();
-	NetworkThread::getInstance()->Wait();
 
 	return 0;
 }

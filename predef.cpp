@@ -5,7 +5,7 @@
 
 
 // 사용가능한 GPIO번호
-int global_CAMERA_GPIO[] = { 17, 18, 27, 22, 23, 24, 25, 5, 6, 12, 13 };
+int global_CAMERA_GPIO[] = { 17, 18, 27, 23, 24, 25, 5, 6, 12, 13, 22 };
 
 
 // Aperture

@@ -167,8 +167,8 @@ extern std::vector<CameraInfo> global_Camerainfo;
 #define CAPTURE_TO_RAM			0 // "Internal RAM"
 #define CAPTURE_TO_SDCARD		1 // "Memory card"
 
-// 카메라 최대 10개
-#define MAX_CAMERA	10
+// 카메라 최대 10개 + 더미 1
+#define MAX_CAMERA	11
 
 //////////////////////////////////////////////////////////////////////////
 

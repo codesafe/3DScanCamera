@@ -27,4 +27,5 @@ private :
 	CameraWrapper* cameraWrapper;
 
 	string params[CAMERA_PARAM::PARAM_MAX];
+	bool cameraBusy;
 };

@@ -1,0 +1,10 @@
+[MASTER]
+false
+[NAME]
+rasp_2
+[FTP_ID]
+pi
+[FTP_PASSWD]
+1111
+[SERVERIP]
+192.168.29.103

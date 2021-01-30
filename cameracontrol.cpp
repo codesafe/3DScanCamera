@@ -4,12 +4,11 @@
 #include <iostream>
 #include <functional>
 
-
 CameraControl::CameraControl()
 {
 	cameraWrapper = nullptr;
+	cameraBusy = false;
 }
-
 
 CameraControl::~CameraControl()
 {
@@ -33,18 +32,22 @@ bool CameraControl::ReleaseButton()
 	if (SetRadioWidgetName("eosremoterelease", "Release 1") == false)
 		return false;
 
+	cameraBusy = false;
 	return true;
 }
 
 bool CameraControl::AutoFocus()
 {
+	cameraBusy = false;
+
 	if (SetRadioWidgetName("eosremoterelease", "Release 1") == false)
 	 	return false;
 
 	if (SetRadioWidgetName("eosremoterelease", "Press 1") == false)
 		return false;
 
-	Utils::Sleep(1);
+	//Utils::Sleep(1);
+	Utils::Sleep(0.5f);
 
 	if (SetToggleWidget("autofocusdrive", "false") == false)
 		return false;
@@ -52,17 +55,30 @@ bool CameraControl::AutoFocus()
 	if (SetToggleWidget("cancelautofocus", "true") == false)
 		return false;
 
+	cameraBusy = true;
 	return true;
 }
 
 bool CameraControl::ApplyParam()
 {
-	if (SetRadioWidget("ISO Speed", params[CAMERA_PARAM::ISO]) == false) return false;
-	if (SetRadioWidget("Aperture", params[CAMERA_PARAM::APERTURE]) == false) return false;
-	if (SetRadioWidget("Shutter Speed", params[CAMERA_PARAM::SHUTTERSPEED]) == false) return false;
-	if (SetRadioWidget("Image Format", params[CAMERA_PARAM::CAPTURE_FORMAT]) == false) return false;
+	if (cameraBusy == true)
+	{
+		ReleaseButton();
+		cameraBusy = false;
+	}
+
+	if (SetRadioWidget("ISO Speed", params[CAMERA_PARAM::ISO]) == false) 
+		return false;
+	if (SetRadioWidget("Aperture", params[CAMERA_PARAM::APERTURE]) == false) 
+		return false;
+	if (SetRadioWidget("Shutter Speed", params[CAMERA_PARAM::SHUTTERSPEED]) == false) 
+		return false;
+	if (SetRadioWidget("Image Format", params[CAMERA_PARAM::CAPTURE_FORMAT]) == false) 
+		return false;
 
 	Logger::log("ApplyParam");
+
+	cameraBusy = false;
 	return true;
 }
 

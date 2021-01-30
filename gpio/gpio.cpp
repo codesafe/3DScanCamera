@@ -203,7 +203,8 @@ namespace exploringRPi {
 		this->toggleNumber = numberOfTimes;
 		this->togglePeriod = time;
 		this->threadRunning = true;
-		if (pthread_create(&this->thread, NULL, &threadedToggle, static_cast<void*>(this))) {
+		if (pthread_create(&this->thread, NULL, &threadedToggle, static_cast<void*>(this))) 
+		{
 			perror("GPIO: Failed to create the toggle thread");
 			this->threadRunning = false;
 			return -1;
@@ -216,10 +217,13 @@ namespace exploringRPi {
 	{
 		GPIO* gpio = static_cast<GPIO*>(value);
 		bool isHigh = (bool)gpio->getValue(); //find current value
-		while (gpio->threadRunning) {
+		while (gpio->threadRunning) 
+		{
 			if (isHigh)	gpio->setValue(HIGH);
 			else gpio->setValue(LOW);
+
 			usleep(gpio->togglePeriod * 500);
+
 			isHigh = !isHigh;
 			if (gpio->toggleNumber > 0) gpio->toggleNumber--;
 			if (gpio->toggleNumber == 0) gpio->threadRunning = false;
@@ -234,11 +238,13 @@ namespace exploringRPi {
 		int fd, i, epollfd, count = 0;
 		struct epoll_event ev;
 		epollfd = epoll_create(1);
-		if (epollfd == -1) {
+		if (epollfd == -1) 
+		{
 			perror("GPIO: Failed to create epollfd");
 			return -1;
 		}
-		if ((fd = open((this->path + "value").c_str(), O_RDONLY | O_NONBLOCK)) == -1) {
+		if ((fd = open((this->path + "value").c_str(), O_RDONLY | O_NONBLOCK)) == -1) 
+		{
 			perror("GPIO: Failed to open file");
 			return -1;
 		}
@@ -253,7 +259,8 @@ namespace exploringRPi {
 			return -1;
 		}
 		while (count <= 1) 
-		{  // ignore the first trigger
+		{
+			// ignore the first trigger
 			i = epoll_wait(epollfd, &ev, 1, -1);
 			if (i == -1) 
 			{
@@ -266,7 +273,11 @@ namespace exploringRPi {
 			}
 		}
 		close(fd);
-		if (count == 5) return -1;
+		close(epollfd);
+
+		if (count == 5) 
+			return -1;
+
 		return 0;
 	}
 

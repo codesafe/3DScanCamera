@@ -80,12 +80,12 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="camerathread.cpp" />
-    <ClCompile Include="mastercontrol.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="networkthread.cpp" />
     <ClCompile Include="tcpsocket.cpp" />
     <ClCompile Include="predef.cpp" />
     <ClCompile Include="cameracontrol.cpp" />
+    <ClCompile Include="slaveremotecontrol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libgphoto2">
@@ -215,11 +215,11 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="camerathread.h" />
-    <ClInclude Include="mastercontrol.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="networkthread.h" />
     <ClInclude Include="tcpsocket.h" />
     <ClInclude Include="cameracontrol.h" />
+    <ClInclude Include="slaveremotecontrol.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />
