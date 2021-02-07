@@ -42,6 +42,7 @@ bool CameraThread::Initialize()
 	for (int i = 0; i < cameranumber; i++)
 	{
 		_thread[i] = thread(&CameraThread::CameraWorkThread, this, i);
+		Utils::Sleep(0.5f);
 	}
 
 	// GPIO Trigger 더미가 필요
@@ -63,6 +64,13 @@ void CameraThread::GPIODummyThread(int dummypos)
 	gpio[dummypos] = new GPIO(MASTERCONTROL_GPIO);
 	gpio[dummypos]->setDirection(GPIO_DIRECTION::OUTPUT);
 	gpio[dummypos]->setValue(HIGH);
+
+	Utils::Sleep(0.5f);
+
+	gpio_autofocus = new GPIO(FOCUS_GPIO);
+	gpio_autofocus->setDirection(GPIO_DIRECTION::OUTPUT);
+	gpio_autofocus->setValue(LOW);
+
 #endif
 	
 	bool loop = true;
@@ -75,24 +83,33 @@ void CameraThread::GPIODummyThread(int dummypos)
 		_Command command;
 		CommandQueue::getInstance()->GetCommand(command);
 
-		// 찍기만 관여
-		if (command.buffer[0] == PACKET_SHOT)
+		char packet = command.buffer[0];
+
+		if (packet == PACKET_SHOT)
 		{
-			// Slave GPIO를 향하여 Trigger on
+			// 찍기 신호		Slave GPIO를 향하여 Trigger on
 			gpio[dummypos]->setValue(LOW);
 
 			//Logger::log("Master GPIO Trigger On");
 
 			Utils::Sleep(1);
 			gpio[dummypos]->setValue(HIGH);
+		}
+		else if (packet == PACKET_AUTOFOCUS_TOGGLE)
+		{
+			Logger::log("GPIO autofocus toggle");
 
+			// GPIO 사용하는 autofocus는 여기에서 처리
+			bool focused = command.buffer[1] == 1 ? true:false;
+			gpio_autofocus->setValue(focused ? HIGH : LOW);
 		}
 	}
 }
 
 void CameraThread::CameraWorkThread(int cameralocalnumber)
 {
-	Logger::log("\n----------------------\nCreate Camera thread %d\n----------------------", cameralocalnumber);
+	Logger::log("\n----------------------\nCreate Camera Thread : %d, GPIO : %d\n----------------------", 
+		cameralocalnumber, global_CAMERA_GPIO[cameralocalnumber]);
 
 #ifdef _ENABLE_GPIO
 	// 카메라 Shoot용 GPIO
@@ -156,20 +173,22 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 			// GPIO에서 Shoot 신호들어옴
 			gpio[cameralocalnumber]->setValue(HIGH);
 
-			std::string  date = Utils::getCurrentDateTime();
+			//std::string  date = Utils::getCurrentDateTime();
 			//Logger::log("GPIO --> %s", date.c_str());
 
 			Utils::Sleep(2);
 
 			gpio[cameralocalnumber]->setValue(LOW);
-			cameracontrol[cameralocalnumber]->ReleaseButton();
+			//cameracontrol[cameralocalnumber]->ReleaseButton();
 
+			Logger::log("** Captured %d Wait download", cameralocalnumber);
 
 			string name = Utils::format_string("%s-%d.%s", global_machine_name.c_str(), cameralocalnumber,
 				global_capturefile_ext.c_str());
 			cameracontrol[cameralocalnumber]->GetFilefromCamera(name.c_str());
 
 			Utils::Sleep(1);
+			Logger::log("** Upload Image");
 
 			// Upload to FTP
 			StartUpload(cameralocalnumber);
@@ -193,10 +212,13 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 			delaytime[i] = delay;
 			Logger::log("PACKET_SET_PARAMETER %d : %d : %d : %d %f", i, s, a, f, delay);
 
-			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::ISO, global_isoString[i]);
-			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::SHUTTERSPEED, global_shutterspeedString[s]);
-			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::APERTURE, global_apertureString[a]);
-			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::CAPTURE_FORMAT, global_captureformatString[f]);
+			string modelname = global_Camerainfo[cameralocalnumber].modelname;
+
+
+			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::ISO, global_parameter_iso[modelname][i]);
+			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::SHUTTERSPEED, global_parameter_shutterspeed[modelname][s]);
+			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::APERTURE, global_parameter_aperture[modelname][a]);
+			cameracontrol[cameralocalnumber]->SetParam(CAMERA_PARAM::CAPTURE_FORMAT, global_parameter_captureformat[modelname][f]);
 			bool ret = cameracontrol[cameralocalnumber]->ApplyParam();
 
 			char buf[TCP_BUFFER] = { 0, };
@@ -207,6 +229,7 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 		}
 		else if (command.buffer[0] == PACKET_AUTOFOCUS)
 		{
+/*
 			// ftp path 읽어야함
 			global_ftp_path = (char*)(command.buffer + 1);
 
@@ -218,6 +241,7 @@ void CameraThread::ParseCommand(int cameralocalnumber)
 			buf[1] = (char)cameralocalnumber;
 			buf[2] = ret ? RESPONSE_OK : RESPONSE_FAIL;
 			NetworkThread::getInstance()->Send(buf);
+*/
 		}
 	}
 }

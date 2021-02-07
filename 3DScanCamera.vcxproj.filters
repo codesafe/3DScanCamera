@@ -86,6 +86,7 @@
     <ClCompile Include="predef.cpp" />
     <ClCompile Include="cameracontrol.cpp" />
     <ClCompile Include="slaveremotecontrol.cpp" />
+    <ClCompile Include="csvread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libgphoto2">
@@ -99,6 +100,9 @@
     </Filter>
     <Filter Include="gpio">
       <UniqueIdentifier>{e3b9e143-ba0d-4b13-98f1-8b5f78282fa5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parameter">
+      <UniqueIdentifier>{de02c949-eb0f-42c0-aee1-213b7576d15b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -220,9 +224,24 @@
     <ClInclude Include="tcpsocket.h" />
     <ClInclude Include="cameracontrol.h" />
     <ClInclude Include="slaveremotecontrol.h" />
+    <ClInclude Include="csvread.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />
     <Text Include="desc.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="aperture.csv">
+      <Filter>parameter</Filter>
+    </None>
+    <None Include="imageformat.csv">
+      <Filter>parameter</Filter>
+    </None>
+    <None Include="iso.csv">
+      <Filter>parameter</Filter>
+    </None>
+    <None Include="shutterspeed.csv">
+      <Filter>parameter</Filter>
+    </None>
   </ItemGroup>
 </Project>

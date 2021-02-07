@@ -103,6 +103,7 @@
     <ClCompile Include="camerathread.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="csvread.cpp" />
     <ClCompile Include="gphoto2pp\src\camera_abilities_list_wrapper.cpp" />
     <ClCompile Include="gphoto2pp\src\camera_file_wrapper.cpp" />
     <ClCompile Include="gphoto2pp\src\camera_list_wrapper.cpp" />
@@ -140,6 +141,7 @@
     <ClInclude Include="camerathread.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="csvread.h" />
     <ClInclude Include="gphoto2pp\include\gphoto2pp\button_widget.hpp" />
     <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_abilities_list_wrapper.hpp" />
     <ClInclude Include="gphoto2pp\include\gphoto2pp\camera_capture_type_wrapper.hpp" />
@@ -187,6 +189,12 @@
     <Text Include="config.txt" />
     <Text Include="desc.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="aperture.csv" />
+    <None Include="imageformat.csv" />
+    <None Include="iso.csv" />
+    <None Include="shutterspeed.csv" />
+  </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
       <AdditionalIncludeDirectories>gphoto2pp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -195,7 +203,7 @@
       <LibraryDependencies>gphoto2;gphoto2_port;pthread;curl;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>cp config.txt bin/ARM64/Debug</Command>
+      <Command>cp config.txt bin/ARM64/Debug; cp *.csv bin/ARM64/Debug</Command>
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -214,7 +222,7 @@
       <LibraryDependencies>gphoto2;gphoto2_port;pthread;curl;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>cp config.txt bin/ARM64/Release</Command>
+      <Command>cp config.txt bin/ARM64/Release;cp *.csv bin/ARM64/Release</Command>
     </RemotePostBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>gphoto2pp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

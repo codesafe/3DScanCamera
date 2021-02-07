@@ -5,6 +5,7 @@
 #include "tcpsocket.h"
 #include "slaveremotecontrol.h"
 #include "utils.h"
+#include "csvread.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -94,10 +95,19 @@ void DisplayVersion()
 	Logger::log("Gphoto2 %s ", gphoto2version.c_str());
 }
 
+void LoadCamaraParams()
+{
+	ReadCameraParameter("./iso.csv", "iso");
+	ReadCameraParameter("./aperture.csv", "aperture");
+	ReadCameraParameter("./shutterspeed.csv", "shutterspeed");
+	ReadCameraParameter("./imageformat.csv", "imageformat");
+}
 
 int main(void)
 {
 	DisplayVersion();
+	// 카메라 파라메터 설정 읽기
+	LoadCamaraParams();
 
 	// Load config.txt
 	Config::getInstance()->Initialize();
@@ -118,6 +128,9 @@ int main(void)
 
 	// Recieve Server Address
 	//RecieveServerInfo(); 
+
+
+
 
 	// Start Camera Thread
 	CameraThread cameraThread;

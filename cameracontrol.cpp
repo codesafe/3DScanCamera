@@ -25,6 +25,15 @@ bool CameraControl::Initialize(string modelname, string port)
 void CameraControl::SetParam(CAMERA_PARAM param, string value)
 {
 	params[param] = value;
+	if (param == CAPTURE_FORMAT)
+	{
+		// 니콘은 DSC_0035.NEF 이런식이다
+		if (value == "RAW + Large Fine JPEG" || value == "RAW" || value == "NEF+Fine" || value == "NEF (Raw)")
+			global_capturefile_ext = "raw";
+		else
+			global_capturefile_ext = "jpg";
+		Logger::log("captureformat  %s", global_capturefile_ext.c_str());
+	}
 }
 
 bool CameraControl::ReleaseButton()
@@ -39,6 +48,10 @@ bool CameraControl::ReleaseButton()
 bool CameraControl::AutoFocus()
 {
 	cameraBusy = false;
+// 
+// 	if (SetToggleWidget("autofocusdrive", "true") == false)
+// 		return false;
+
 
 	if (SetRadioWidgetName("eosremoterelease", "Release 1") == false)
 	 	return false;
@@ -48,12 +61,12 @@ bool CameraControl::AutoFocus()
 
 	//Utils::Sleep(1);
 	Utils::Sleep(0.5f);
-
-	if (SetToggleWidget("autofocusdrive", "false") == false)
-		return false;
-
-	if (SetToggleWidget("cancelautofocus", "true") == false)
-		return false;
+// 
+// 	if (SetToggleWidget("autofocusdrive", "false") == false)
+// 		return false;
+// 
+// 	if (SetToggleWidget("cancelautofocus", "true") == false)
+// 		return false;
 
 	cameraBusy = true;
 	return true;
@@ -61,24 +74,24 @@ bool CameraControl::AutoFocus()
 
 bool CameraControl::ApplyParam()
 {
-	if (cameraBusy == true)
-	{
-		ReleaseButton();
-		cameraBusy = false;
-	}
+	string ioscommand = global_parameter_iso_command[cameraWrapper->getModel()];
+	if (SetRadioWidget(ioscommand, params[CAMERA_PARAM::ISO]) == false)
+		return false;
 
-	if (SetRadioWidget("ISO Speed", params[CAMERA_PARAM::ISO]) == false) 
+	string aperturecommand = global_parameter_aperture_command[cameraWrapper->getModel()];
+	if (SetRadioWidget(aperturecommand, params[CAMERA_PARAM::APERTURE]) == false)
 		return false;
-	if (SetRadioWidget("Aperture", params[CAMERA_PARAM::APERTURE]) == false) 
+
+	string shutterspeedcommand = global_parameter_shutterspeed_command[cameraWrapper->getModel()];
+	if (SetRadioWidget(shutterspeedcommand, params[CAMERA_PARAM::SHUTTERSPEED]) == false)
 		return false;
-	if (SetRadioWidget("Shutter Speed", params[CAMERA_PARAM::SHUTTERSPEED]) == false) 
-		return false;
-	if (SetRadioWidget("Image Format", params[CAMERA_PARAM::CAPTURE_FORMAT]) == false) 
+
+	string captureformatcommand = global_parameter_captureformat_command[cameraWrapper->getModel()];
+	if (SetRadioWidget(captureformatcommand, params[CAMERA_PARAM::CAPTURE_FORMAT]) == false)
 		return false;
 
 	Logger::log("ApplyParam");
 
-	cameraBusy = false;
 	return true;
 }
 
@@ -130,7 +143,8 @@ bool  CameraControl::SetRadioWidget(string param, string value)
 	}
 	catch (gphoto2pp::exceptions::gphoto2_exception& e)
 	{
-		std::cout << "\tError: couldn't change the SetRadioWidget" << std::endl;
+		Logger::log("SetRadioWidget Error => Param : %s, Value : %s, Camera : %s", param.c_str(), value.c_str(), cameraWrapper->getModel().c_str());
+		//std::cout << "\tError: couldn't change the SetRadioWidget" << std::endl;
 		return false;
 	}
 	catch (gphoto2pp::exceptions::ValueOutOfLimits& e)
@@ -184,6 +198,8 @@ int CameraControl::GetFilefromCamera(const char* filename)
 	int ret;
 	bool loop = true;
 
+	Logger::log("** Get Image from CAMERA %s", filename);
+
 	while (loop)
 	{
 		int leftoverms = 1000;
@@ -195,10 +211,10 @@ int CameraControl::GetFilefromCamera(const char* filename)
 		{
 			case GP_EVENT_UNKNOWN:
 			case GP_EVENT_TIMEOUT:
-			case GP_EVENT_FOLDER_ADDED:
 			case GP_EVENT_FILE_CHANGED:
 				break;
 
+			case GP_EVENT_FOLDER_ADDED:
 			case GP_EVENT_FILE_ADDED:
 			{
 				fn = (CameraFilePath*)data;
@@ -244,7 +260,16 @@ int CameraControl::GetFilefromCamera(const char* filename)
 
 				//gp_file_unref(file);
 				gp_file_free(file);
-				//loop = false;
+
+				//// 니콘은 CAPTURE_COMPLETE 안온다.
+				//if (Utils::getManufacture(cameraWrapper->getModel()) == CAMERA_MANUFACTURER::CAMERA_NIKON)
+				{
+					loop = false;
+					Logger::log("FILE_ADDED %s Done!", filename);
+					//close(fd);
+				}
+
+				//cameraWrapper->fileDelete(fn->folder, fn->name);
 			}
 			break;
 

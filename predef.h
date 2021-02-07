@@ -84,11 +84,10 @@ using namespace exploringRPi;
 
 enum CAMERA_MANUFACTURER
 {
-	CAMERA_UNKNOWN,
-	CAMERA_CANON,
-	CAMERA_NIKON,
+	CAMERA_UNKNOWN = -1,
+	CAMERA_CANON = 0,
+	CAMERA_NIKON = 1,
 };
-
 
 typedef struct _GPParams GPParams;
 struct _GPParams
@@ -202,7 +201,9 @@ extern std::vector<CameraInfo> global_Camerainfo;
 #define PACKET_CAMERA_NAME		0x09
 #define	PACKET_SHOT				0x10	// shot picture
 #define PACKET_AUTOFOCUS		0x20	// auto focus
-#define PACKET_SET_PARAMETER	0x30
+#define PACKET_AUTOFOCUS_TOGGLE	0x21	// auto focus toggle
+#define PACKET_SET_PARAMETER	0x30	// 카메라 설정
+#define PACKET_UPLOAD_PATH		0x31	// 업로드 Path
 
 #define PACKET_FORCE_UPLOAD		0x40	// for test
 #define PACKET_UPLOAD_PROGRESS	0x41
@@ -227,7 +228,6 @@ enum CAMERA_PARAM
 
 #define ISO_VALUE				3	// 400
 #define SHUTTERSPEED_VALUE		36	// 1 / 100
-//#define SHUTTERSPEED_VALUE	46	// 1/1000
 #define APERTURE_VALUE			5	// 9
 #define CAPTURE_FORMAT_VALUE	0
 
@@ -244,10 +244,31 @@ extern string global_aperture;
 extern string global_shutterspeed;
 extern string global_captureformat;
 
-extern string global_apertureString[];
-extern string global_isoString[];
-extern string global_shutterspeedString[];
-extern string global_captureformatString[];
+extern string global_cmd_iso[];
+extern string global_cmd_aperture[];
+extern string global_cmd_shutterspeed[];
+extern string global_cmd_imageformat[];
+
+
+//extern string global_apertureString[];
+//extern string global_isoString[];
+//extern string global_shutterspeedString[];
+//extern string global_captureformatString[];
+
+// 기종별 파라메터
+extern map<string, vector<string>> global_parameter_iso;
+extern map<string, vector<string>> global_parameter_aperture;
+extern map<string, vector<string>> global_parameter_shutterspeed;
+extern map<string, vector<string>> global_parameter_captureformat;
+
+// 기종별 커맨드
+extern map<string, string> global_parameter_iso_command;
+extern map<string, string> global_parameter_aperture_command;
+extern map<string, string> global_parameter_shutterspeed_command;
+extern map<string, string> global_parameter_captureformat_command;
+
+extern bool ReadCameraParameter(string path, string key);
+
 
 // read from local config.txt
 extern bool global_ismaster;
@@ -263,7 +284,9 @@ extern string global_camera_id;
 extern string global_ftp_id;
 extern string global_ftp_passwd;
 
-#define MASTERCONTROL_GPIO		26 // GPIO 26은 마스터용
+#define MASTERCONTROL_GPIO		26	// GPIO 26은 마스터용
+#define FOCUS_GPIO				21	// GPIO 21은 Focus 전용
+
 extern int global_CAMERA_GPIO[];
 
 

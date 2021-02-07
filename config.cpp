@@ -24,7 +24,7 @@ bool Config::Initialize()
 		{
 			char keybuffer[32] = { 0, };
 			fgets(keybuffer, sizeof(keybuffer), fp);
-			Utils::clearString(keybuffer);
+			Utils::clearString(keybuffer,32);
 
 			string keystr(keybuffer);
 			keystr.erase(std::remove(keystr.begin(), keystr.end(), '['), keystr.end());
@@ -32,7 +32,7 @@ bool Config::Initialize()
 
 			char valuebuffer[32] = { 0, };
 			fgets(valuebuffer, sizeof(valuebuffer), fp);
-			Utils::clearString(valuebuffer);
+			Utils::clearString(valuebuffer,32);
 			string valuestr(valuebuffer);
 
 			configlist.insert(make_pair(keystr, valuestr));

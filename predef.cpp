@@ -1,53 +1,180 @@
 #include "predef.h"
-
+#include "csvread.h"
+#include "utils.h"
 
 //==============================================================================================================================
 
+// 카메라 커맨드 : CANON, NIKON 순서
+// string global_cmd_iso[] = { "ISO Speed", "ISO Speed" };
+// string global_cmd_aperture[] = { "Aperture", "F-Number" };
+// string global_cmd_shutterspeed[] = { "Shutter Speed", "Shutter Speed" };
+// string global_cmd_imageformat[] = { "Image Format", "Image Quality" };
 
 // 사용가능한 GPIO번호
 int global_CAMERA_GPIO[] = { 17, 18, 27, 23, 24, 25, 5, 6, 12, 13, 22 };
 
+map<string, vector<string>> global_parameter_iso;
+map<string, vector<string>> global_parameter_aperture;
+map<string, vector<string>> global_parameter_shutterspeed;
+map<string, vector<string>> global_parameter_captureformat;
 
-// Aperture
-string global_apertureString[] = { "5", "5.6", "6.3", "7.1", "8", "9", "10", "11", "13", "14",  "16", "18", "20", "22", "25", "29", "32" };
+map<string, string> global_parameter_iso_command;
+map<string, string> global_parameter_aperture_command;
+map<string, string> global_parameter_shutterspeed_command;
+map<string, string> global_parameter_captureformat_command;
 
-// ISO
-string global_isoString[] = { "Auto", "100", "200", "400", "800", "1600", "3200", "6400" };
+// 카메라 파라메터 읽기
+bool ReadCameraParameter(string path, string key)
+{
+#if 1
+	FILE* fp = fopen(path.c_str(), "rt");
+	if (fp == NULL)
+		return (cout << "File not found" << endl) && 0;
 
-// Shutter Speed
-string global_shutterspeedString[] = {	
-	"bulb", "30", "25", "20", "15", "13", "10", 
-	"8", "6", "5", "4", "3.2", "2.5", "2", "1.6", 
-	"1.3", "1", "0.8", "0.6", "0.5", "0.4", "0.3", 
-	"1/4", "1/5", "1/6", "1/8", "1/10", "1/13", "1/15", 
-	"1/20", "1/25", "1/30", "1/40", "1/50", "1/60", 
-	"1/80", "1/100", "1/125", "1/160", "1/200", "1/250",
-	"1/320", "1/400", "1/500", "1/640", "1/800", "1/1000",
-	"1/1250", "1/1600", "1/2000", "1/2500", "1/3200", "1/4000" 
-};
+	int count = 0;
+	string keys[3];
+	string commands[3];
+	std::vector<string> params[3];
 
-// Capture format
-string global_captureformatString[] = { 
-	"Large Fine JPEG", 
-	"Large Normal JPEG", 
-	"Medium Fine JPEG", 
-	"Medium Normal JPEG", 
-	"Small Fine JPEG",
-	"Small Normal JPEG", 
-	"Smaller JPEG", 
-	"Tiny JPEG", 
-	"RAW + Large Fine JPEG", 
-	"RAW" 
-};
+	while (!feof(fp))
+	{
+		char keybuffer[256] = { 0, };
+		fgets(keybuffer, sizeof(keybuffer), fp);
+		Utils::clearString(keybuffer, 256);
+		
+		string keystr(keybuffer);
+		std::vector<std::string> row = cvsread::getInstance()->csv_read_row(keystr, ',');
+		if (row.empty()) break;
 
+		if (count == 0)
+		{
+			keys[0] = row[0];
+			keys[1] = row[1];
+			keys[2] = row[2];
+		}
+		else if (count == 1)
+		{
+			commands[0] = row[0];
+			commands[1] = row[1];
+			commands[2] = row[2];
+		}
+		else
+		{
+			// x 가 모두 아니면 쓸수있는 파라메터
+			if (row[0] != "x" && row[1] != "x" && row[2] != "x")
+			{
+				params[0].push_back(row[0]);
+				params[1].push_back(row[1]);
+				params[2].push_back(row[2]);
+			}
+		}
+
+		for (int i = 0, leng = row.size(); i < leng; i++)
+			cout << "[" << row[i] << "]" << "\t";
+		cout << endl;
+		count++;
+	}
+	fclose(fp);
+
+#else
+	std::ifstream in(path);
+	if (in.fail()) 
+		return (cout << "File not found" << endl) && 0;
+
+	int count = 0;
+
+	string keys[3];
+	string commands[3];
+	std::vector<string> params[3];
+
+	while (in.good())
+	{
+		std::vector<std::string> row = cvsread::getInstance()->csv_read_row(in, ',');
+		if( row.empty() ) break;
+
+		if (count == 0)
+		{
+			keys[0] = row[0];
+			keys[1] = row[1];
+			keys[2] = row[2];
+		}
+		else if (count == 1)
+		{
+			commands[0] = row[0];
+			commands[1] = row[1];
+			commands[2] = row[2];
+		}
+		else
+		{
+			// x 가 모두 아니면 쓸수있는 파라메터
+			if (row[0] != "x" && row[1] != "x" && row[2] != "x")
+			{
+				params[0].push_back(row[0]);
+				params[1].push_back(row[1]);
+				params[2].push_back(row[2]);
+			}
+		}
+
+		for (int i = 0, leng = row.size(); i < leng; i++)
+			cout << "[" << row[i] << "]" << "\t";
+		cout << endl;
+		count++;
+	}
+	in.close();
+#endif
+	if (key == "iso")
+	{
+		global_parameter_iso.clear();
+		global_parameter_iso.insert(std::make_pair(keys[0], params[0]));
+		global_parameter_iso.insert(std::make_pair(keys[1], params[1]));
+		global_parameter_iso.insert(std::make_pair(keys[2], params[2]));
+
+		global_parameter_iso_command.clear();
+		global_parameter_iso_command.insert(std::make_pair(keys[0], commands[0]));
+		global_parameter_iso_command.insert(std::make_pair(keys[1], commands[1]));
+		global_parameter_iso_command.insert(std::make_pair(keys[2], commands[2]));
+	}
+	else if (key == "aperture")
+	{
+		global_parameter_aperture.clear();
+		global_parameter_aperture.insert(std::make_pair(keys[0], params[0]));
+		global_parameter_aperture.insert(std::make_pair(keys[1], params[1]));
+		global_parameter_aperture.insert(std::make_pair(keys[2], params[2]));
+
+		global_parameter_aperture_command.clear();
+		global_parameter_aperture_command.insert(std::make_pair(keys[0], commands[0]));
+		global_parameter_aperture_command.insert(std::make_pair(keys[1], commands[1]));
+		global_parameter_aperture_command.insert(std::make_pair(keys[2], commands[2]));
+	}
+	else if (key == "shutterspeed")
+	{
+		global_parameter_shutterspeed.clear();
+		global_parameter_shutterspeed.insert(std::make_pair(keys[0], params[0]));
+		global_parameter_shutterspeed.insert(std::make_pair(keys[1], params[1]));
+		global_parameter_shutterspeed.insert(std::make_pair(keys[2], params[2]));
+
+		global_parameter_shutterspeed_command.clear();
+		global_parameter_shutterspeed_command.insert(std::make_pair(keys[0], commands[0]));
+		global_parameter_shutterspeed_command.insert(std::make_pair(keys[1], commands[1]));
+		global_parameter_shutterspeed_command.insert(std::make_pair(keys[2], commands[2]));
+	}
+	else if (key == "imageformat")
+	{
+		global_parameter_captureformat.clear();
+		global_parameter_captureformat.insert(std::make_pair(keys[0], params[0]));
+		global_parameter_captureformat.insert(std::make_pair(keys[1], params[1]));
+		global_parameter_captureformat.insert(std::make_pair(keys[2], params[2]));
+
+		global_parameter_captureformat_command.clear();
+		global_parameter_captureformat_command.insert(std::make_pair(keys[0], commands[0]));
+		global_parameter_captureformat_command.insert(std::make_pair(keys[1], commands[1]));
+		global_parameter_captureformat_command.insert(std::make_pair(keys[2], commands[2]));
+	}
+
+	return true;
+}
 
 //==============================================================================================================================
-
-
-string global_iso = global_isoString[ISO_VALUE];
-string global_aperture = global_apertureString[APERTURE_VALUE];
-string global_shutterspeed = global_shutterspeedString[SHUTTERSPEED_VALUE];
-string global_captureformat = global_captureformatString[CAPTURE_FORMAT_VALUE];
 
 bool global_recieved_serveraddress = false;
 string global_server_address = "";// SERVER_ADD;
@@ -63,3 +190,4 @@ string global_camera_id = "";
 bool global_ismaster = false;
 
 std::vector<CameraInfo> global_Camerainfo;
+

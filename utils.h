@@ -276,9 +276,9 @@ namespace Utils
 	}
 
 
-	static void clearString(char* buf)
+	static void clearString(char* buf, int size)
 	{
-		for (int i = 0; i < 32; i++)
+		for (int i = 0; i < size; i++)
 		{
 			buf[i] = (buf[i] == '\n' || buf[i] == '\r') ? 0 : buf[i];
 		}
@@ -286,9 +286,9 @@ namespace Utils
 
 	static CAMERA_MANUFACTURER getManufacture(string name)
 	{
-		if (name.find("CANON") == string::npos)
+		if (name.find("Canon") == string::npos)
 			return CAMERA_MANUFACTURER::CAMERA_CANON;
-		else if (name.find("NIKON") == string::npos)
+		else if (name.find("Nikon") == string::npos)
 			return CAMERA_MANUFACTURER::CAMERA_NIKON;
 		return CAMERA_MANUFACTURER::CAMERA_UNKNOWN;
 	}

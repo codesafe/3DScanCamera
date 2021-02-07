@@ -96,12 +96,29 @@ void NetworkThread::ParseCommand()
 			}
 			break;
 
-		case PACKET_AUTOFOCUS:		// 카메라 자동 포커스
-		case PACKET_SET_PARAMETER:	// 카메라 옵션 변경
+		case PACKET_AUTOFOCUS:			// 카메라 자동 포커스
+		case PACKET_SET_PARAMETER:		// 카메라 옵션 변경
 			{
 				command.type = CommandType::COMMAND_NETWORK;
 				memcpy(command.buffer, buffer, TCP_BUFFER);
 				sendcommand = true;
+			}
+			break;
+
+		case PACKET_AUTOFOCUS_TOGGLE:	// 카메라 자동 포커스 토글
+			{
+				// dummy thread로
+				Logger::log("Packet autofocus toggle");
+				command.type = CommandType::COMMAND_NETWORK;
+				memcpy(command.buffer, buffer, TCP_BUFFER);
+				sendcommand = true;
+			}
+			break;
+
+		case PACKET_UPLOAD_PATH :
+			{
+				global_ftp_path = (char*)(buffer + 1);
+				Logger::log("Get Upload Path : %s", global_ftp_path.c_str());
 			}
 			break;
 

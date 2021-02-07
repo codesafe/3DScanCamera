@@ -36,6 +36,7 @@ private :
 	thread	_thread[MAX_CAMERA];
 
 	GPIO *gpio[MAX_CAMERA];
+	GPIO *gpio_autofocus;
 	CameraControl* cameracontrol[MAX_CAMERA];
 
 
